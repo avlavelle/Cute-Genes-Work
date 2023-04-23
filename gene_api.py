@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 #Anna Victoria Lavelle
-#April 20, 2023
+#April 26, 2023
 
 from flask import Flask, request, send_file
 from collections import Counter, OrderedDict
@@ -49,15 +49,23 @@ def get_data():
 @app.route('/data', methods = ['POST', 'GET', 'DELETE'])
 def handle_data():
     """
-    A route that posts the data, deletes the data, or outputs the data depending on 
-    the user's query.
+    POST: Posts the data to the database and returns confirmation of this to the    
+          user.
+    GET: Retrieves the data from the database and returns it to the user.
+    DELETE: Deletes the data from the database and returns confirmaiton of this to
+            the user.
 
     Args:
-        None.
+        POST: None.
+        GET: None.
+        DELETE: None.
 
     Returns:
-        output_list (list): Returns the redis data.
+        POST (str): Returns "Data loaded" message.
+        GET (output_list): Returns the data from the database.
+        DELETE (str): Returns "Data deleted, there are 0 keys in the db" message.
     """
+
     if request.method == 'GET':
         output_list = []
         if len(rd.keys()) < 1:
@@ -82,7 +90,7 @@ def handle_data():
 @app.route('/genes/<string:hgnc_id>', methods = ['GET'])
 def get_gene(hgnc_id: str) -> dict:
     """
-    A route that returns all data associated with a hgnc_id.
+    A route that returns all data associated with a specified hgnc_id.
 
     Args:
         hgnc_id (str): The specified hgnc_id.
@@ -90,6 +98,7 @@ def get_gene(hgnc_id: str) -> dict:
     Returns:
         items (dict): Dictionary with all data for the hgnc_id.
     """
+
     if len(rd.keys()) < 1:
         return ("No data in the database. Please use a POST route first.\n")
     items = json.loads(rd.get(hgnc_id))
@@ -106,6 +115,7 @@ def get_genes() -> list:
     Returns:
         output (list): List of all hgnc_ids.
     """
+
     output = []
     if len(rd.keys()) < 1:
         return ("No data available in the database. Please use a POST route first.\n")
@@ -114,15 +124,21 @@ def get_genes() -> list:
 @app.route('/image', methods = ['POST','GET', 'DELETE'])
 def get_image():
     """
-    A route that reads data from the database, creates an image of a plot, posts it in    to the database, gets the image from the database, and deletes the image from the
-    database.
+    POST: Reads data from the database, creates an image of a plot, and posts it into
+          another database. Returns confirmation of this to the user.
+    GET: Retrieves the image from the database and returns it to the user.
+    DELETE: Deletes the image from the database and returns confirmation of this to
+            the user.
 
     Args:
-        None.
+        POST: None.
+        GET: None.
+        DELETE: None.
 
     Returns:
-        (file_bytes): Returns the file_bytes of the image in the POST route.
-        send_file(): Returns the image to the user in the GET route.
+        POST (str): Returns "Image created" message.
+        GET (file): Returns the image to the user which becomes accessible using scp.
+        DELETE (str): Returns "Image deleted, there are 0 images in the db" message.
     """
     if len(rd.keys()) < 1:
         return ("No data in the database. Please use a POST route first.\n")
@@ -162,9 +178,11 @@ def get_image():
         if len(rd1.keys()) < 1:
             return ("No image in the database to delete. Please use a POST route first.\n")
         rd1.flushdb()
-        return f'Image deleted, there are {len(rd1.keys())} keys in the db.\n'
+        return f'Image deleted, there are {len(rd1.keys())} images in the db.\n'
     else:
         return 'The method you tried does not work.\n'
+
+
     
     
 
