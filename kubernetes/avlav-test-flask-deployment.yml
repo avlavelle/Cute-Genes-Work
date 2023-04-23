@@ -1,0 +1,28 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: avlav-test-flask-deployment
+  labels:
+    username: avlav
+    env: test
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: avlav-test-flask
+  template:
+    metadata:
+      labels:
+        app: avlav-test-flask
+    spec:
+      containers:
+        - name: flaskdeploys
+          imagePullPolicy: Always
+          image: avlavelle/gene_api
+          env:
+          - name: REDIS_IP
+            value: avlav-test-redis-service
+          ports:
+          - name: http
+            containerPort: 5000
