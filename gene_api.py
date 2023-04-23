@@ -140,6 +140,7 @@ def get_image():
         GET (file): Returns the image to the user which becomes accessible using scp.
         DELETE (str): Returns "Image deleted, there are 0 images in the db" message.
     """
+
     if len(rd.keys()) < 1:
         return ("No data in the database. Please use a POST route first.\n")
     years = []
@@ -181,6 +182,37 @@ def get_image():
         return f'Image deleted, there are {len(rd1.keys())} images in the db.\n'
     else:
         return 'The method you tried does not work.\n'
+
+@app.route('/help', methods = ['GET'])
+def get_help() -> str:
+    """
+    A route that provides help test fro the user that describes each route.
+
+    Args:
+        None
+
+    Returns:
+        help (str): Help text for the user.
+    """
+
+    intro = "\nThese are the routes for the gene_api.py.\n"
+    head1 = "\nretrieve elements from the data in the database\n"
+    head2 = "\npost data to the database\n"
+    head3 = "\ndelete data from the database\n"
+    head4 = "\nget help\n"
+
+    one ="   /data (GET)                                Return all the data in the database\n"
+    two ="   /data (POST)                               Post the data to the database\n"
+    thr ="   /data (DELETE)                             Delete the data from the database\n"
+    fou ="   /genes (GET)                               Return a list of all HGNC IDs\n"
+    fiv ="   /genes/<hgnc_id> (GET)                     Returns all of the information for a specified HGNC ID\n"
+    six ="   /help (GET)                                Return help text for the user\n"
+    sev ="   /image (POST)                              Generate a plot and post it to the database\n"
+    eig ="   /image (DELETE)                            Delete image from the database\n"
+    nin ="   /image (GET)                               Return image to the user\n"
+
+    return intro + head2 + two + sev + head1 + one + fou + fiv + nin + head3 + thr + eig + head4 + six
+
 
 
     
