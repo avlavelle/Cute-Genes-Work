@@ -1,10 +1,10 @@
-# Gene Party 3.0: Parsing HGNC Data and Using Kubernetes
+# You're Cute Genes: Which Genes are Being Discovered and When?
+###############################################################
+This project is compiled of three Python scripts that build a Flask application and provide different routes for the user to query that return different pieces of information about the HGNC data, using the HGNC data from HUGO.The project also includes a Dockerfile that allows any user to pull the image from Docker Hub and run an instance of the image into a container on their personal machine, as well as a docker-compose file that allows a user to start the container easily and succinctly.
 
-This project is compiled of one script that builds a Flask application and provides different routes for the user to query that return different pieces of information about the HGNC data, using the HGNC data from HUGO.The project also includes a Dockerfile that allows any user to pull the image from Docker Hub and run an instance of the image into a container on their personal machine, as well as a Docker-compose file that allows a user to start the container easily and succinctly.
-
-The Flask application routes are important because the HGNC data contains loads of information that may not be interesting to the user. The Flask application and the routes allow users to quickly query the information that they may be looking for without having to comb through the data manually. The application also utilizes the Redis database, making it possible to store and come back to the data. The Dockerfile allows any user to have access to these capabilities through running an instance of the image on their own machine, plus the Docker compose file automates the deployment of the application, so the container is easy to start. 
-
-The project also includes five .yml files that include a Redis service, deployment, and pvc, as well as a Flask service and deployment. These files allow the project to be deployed into Kubernetes.
+The Flask application routes are important because the HGNC data contains loads of information that may not be interesting to the user. The Flask application and the routes allow users to quickly query the information that they may be looking for without having to comb through the data manually. The application also utilizes the Redis database, making it possible to store and come back to the data. The Dockerfile allows any user to have access to these capabilities through running an instance of the image on their own machine, plus the docker-compose file automates the deployment of the application, so the container is easy to start. 
+################################################################
+The project also includes .yml files that include a Redis service, deployment, and pvc, as well as a Flask service and deployment. These files allow the project to be deployed into Kubernetes.
 
 ## Accessing and Describing the Data
  
@@ -97,4 +97,57 @@ The return of this route will not be visible to the user.
 For the ```/image``` DELETE route which deletes the plot from the database:
 ```
 Image deleted, there are 0 keys in the db
+```
+
+For the ```/help``` route which returns help text for the user:
+```
+These are the routes for the gene_api.py.
+
+post data to the database
+    /data (POST)              Post the data to the database
+    ...
+retrieve elements from the data in the database
+    /data (GET)               Return all the data in the database
+    ...
+delete data from the database
+    /data (DELETE)            Delete the data from the database
+    ...
+get help
+    /help (GET)               Return help text for the user
+```
+
+For the ```/when/<hgnc_id>``` route which returns the approval and modification dates of a specified gene:
+```
+{
+ "date first approved": "1989-06-30",
+ "date last modified": "2023-01-20"
+}
+```
+
+For the ```/imagedata``` route which returns the data used to create the plot in the ```/image``` POST route:
+```
+{
+ "1986": 307,
+ "1987": 8,
+ "1988": 156,
+ ...,
+ "2023": 124,
+ "Years": "Number of Entries Approved"
+}
+```
+
+For the ```/locus/<hgnc_id>``` route which returns the locus group of a specified gene:
+```
+{
+ "locus group": "protein-coding gene"
+}
+```
+
+For the ```/locusdata``` route which returns the tabulated values for the amount of genes in each locus group:
+```
+{
+ "Locus Group": "Number of Entries",
+ "non-coding RNA": 9056"
+ ...
+}
 ```
