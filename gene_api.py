@@ -121,6 +121,7 @@ def get_genes() -> list:
         return ("No data available in the database. Please use a POST route first.\n")
     return rd.keys()
 
+
 @app.route('/image', methods = ['POST','GET', 'DELETE'])
 def get_image():
     """
@@ -143,8 +144,8 @@ def get_image():
 
     if len(rd.keys()) < 1:
         return ("No data in the database. Please use a POST route first.\n")
-    years = []
     counts = []
+    years = []
     if request.method == 'POST':
         for item in rd.keys():
             gene = json.loads(rd.get(item))
@@ -165,7 +166,8 @@ def get_image():
         plt.savefig('approvalyears.png')
         file_bytes = open('./approvalyears.png', 'rb').read()
         rd1.set('genes_approved', file_bytes)
-        return ("Image created.\n")
+        rd1.set('image_data', json.dumps(yeard))
+        return ("Image created\n")
     elif request.method == 'GET':
         path = './myapprovalyears.png'
         with open(path, 'wb') as f:
@@ -210,18 +212,113 @@ def get_help() -> str:
     sev ="   /image (POST)                              Generate a plot and post it to the database\n"
     eig ="   /image (DELETE)                            Delete image from the database\n"
     nin ="   /image (GET)                               Return image to the user\n"
+    ten ="   /when/<hgnc_id> (GET)                      Return dates of approval or modification for a specified HGNC ID\n"
+    ele ="   /imagedata (GET)                           Return the data used to generate the image from the /image route\n"
+    twe ="   /locusdata (GET)                           Return the number of entries in each locus group\n"
+    thi ="   /locus/<hgnc_id>                           Return the locus group of a specified HGNC ID\n"
+    return intro + head2 + two + sev + head1 + one + fou + fiv + nin + ele+ ten +twe + thi+ head3 + thr + eig + head4 + six
 
-    return intro + head2 + two + sev + head1 + one + fou + fiv + nin + head3 + thr + eig + head4 + six
-
-
-
+@app.route('/when/<string:hgnc_id>', methods = ['GET'])
+def get_date(hgnc_id: str) -> dict:
+    """
+    A route that returns when a specified HGNC ID was first approved, last 
+    modified, or had their gene symbol or name changed. Not all of these attributes
+    are available for each gene, but every attribute available is returned.
     
+    Args:
+        hgnc_id (str): The specified hgnc_id.
+
+    Returns:
+        dates (dict): Dictionary with all of the relevant dates.
+    """
+
+    if len(rd.keys()) < 1:
+        return ("No data in the database. Please use a POST route first.\n")
+    items = json.loads(rd.get(hgnc_id))
+
+    dates = {}
+    for item in items:
+        if item == "date_approved_reserved":
+            dates["date first approved"] = items[item]
+        elif item == "date_modified":
+            dates["date last modified"] = items[item]
+        elif item ==  "date_symbol_changed":
+            dates["date symbol last changed"] = items[item]
+        elif item == "date_name_changed":
+            dates["date name last changed"] = items[item]
+
+    return dates
+
+@app.route('/imagedata', methods = ['GET'])
+def get_imagedata() -> dict:
+    """
+    A route that returns the data used to create the plot in the /image POST route.
+
+    Args:
+        None.
+
+    Returns:
+        approved (dict): Dictionary with how many genes were approved each year.    
+    """
+
+    if len(rd.keys()) < 1:
+        return ("No data in the database. Please use a POST route first.\n")
+    if len(rd1.keys()) < 1:
+        return("No image data populated yet. Please use a POST route first.\n")
+
+    approved = json.loads(rd1.get("image_data"))
+    title = {"Years": "Number of Entries Approved"}
+    title.update(approved)
+    return title
+                
+@app.route('/locus/<string:hgnc_id>', methods = ['GET'])
+def get_locus(hgnc_id: str) -> dict:
+    """
+    A route that returns the locus_group of a specified gene.
+
+    Args:
+        hgnc_id (str): The specified hgnc_id.
+
+    Returns:
+        group (dict): Dictionary with locus group of the hgnc_id.
+    """
     
+    if len(rd.keys()) < 1:
+        return ("No data in the database. Please use a POST route first.\n")
+    items = json.loads(rd.get(hgnc_id))
 
+    group = {}
+    for item in items:
+        if item == "locus_group":
+            group["locus group"] = items[item]
 
+    return group
 
+@app.route('/locusdata', methods = ['GET'])
+def get_locusdata() -> dict:
+    """
+    A route that returns the amount of each locus group in the data.
 
+    Args:
+        None.
 
+    Returns:
+        locus (dict): Dictionary with how many of each locus group there are.    
+    """
+
+    if len(rd.keys()) < 1:
+        return ("No data in the database. Please use a POST route first.\n")
+    counts = []
+    groups = []
+    for item in rd.keys():
+        gene = json.loads(rd.get(item))
+        group = gene['locus_group']
+        groups.append(group)
+    groupd = dict(Counter(groups))
+    groupd = dict(sorted(groupd.items()))
+    title = {"Locus Group": "Number of Entries"}
+    title.update(groupd)
+    return title
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0')
