@@ -215,7 +215,7 @@ def get_help() -> str:
     ten ="   /when/<hgnc_id> (GET)                      Return dates of approval or modification for a specified HGNC ID\n"
     ele ="   /imagedata (GET)                           Return the data used to generate the image from the /image route\n"
     twe ="   /locusdata (GET)                           Return the number of entries in each locus group\n"
-    thi ="   /locus/<hgnc_id>                           Return the locus group of a specified HGNC ID\n"
+    thi ="   /locus/<hgnc_id> (GET)                     Return the locus group of a specified HGNC ID\n"
     return intro + head2 + two + sev + head1 + one + fou + fiv + nin + ele+ ten +twe + thi+ head3 + thr + eig + head4 + six
 
 @app.route('/when/<string:hgnc_id>', methods = ['GET'])
@@ -268,8 +268,13 @@ def get_imagedata() -> dict:
 
     approved = json.loads(rd1.get("image_data"))
     title = {"Years": "Number of Entries Approved"}
-    title.update(approved)
-    return title
+    final = OrderedDict({})
+    final.update({"Years": "Number of Entries Approved"})
+    for item in approved:
+        final.update({item: approved[item]})
+    final.move_to_end("Years", last = False)
+
+    return final
                 
 @app.route('/locus/<string:hgnc_id>', methods = ['GET'])
 def get_locus(hgnc_id: str) -> dict:
